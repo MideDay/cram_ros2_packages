@@ -28,7 +28,7 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "main = robokudo_ros.scripts.main:main",
+            "main = robokudo.scripts.main:main",
         ],
     },
 )
