@@ -1,68 +1,13 @@
-import os
-from ament_index_python.packages import get_package_share_directory
-from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch_ros.actions import Node
-from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, RegisterEventHandler
-from launch.conditions import IfCondition
-from launch.event_handlers import OnProcessExit
-from launch.substitutions import (
-    Command,
-    FindExecutable,
-    LaunchConfiguration,
-    PathJoinSubstitution,
-)
-
-from launch_ros.actions import Node
-from launch_ros.substitutions import FindPackageShare
+from giskardpy_ros.launch_helpers import giskard_launch_description
 
 
 def generate_launch_description():
-    tracy_xacro_file = os.path.join(
-        get_package_share_directory("iai_tracy_description"), "urdf", "tracy.urdf.xacro"
-    )
-    robot_description = Command([FindExecutable(name="xacro"), " ", tracy_xacro_file])
-
-    return LaunchDescription(
-        [
-            # Static transform publisher (example, modify as needed for your robot)
-            # IncludeLaunchDescription(
-            #    PythonLaunchDescriptionSource(upload_pr2_launch)
-            # ),
-            Node(
-                package="tf2_ros",
-                executable="static_transform_publisher",
-                name="static_transform_publisher",
-                output="screen",
-                arguments=["0", "0", "0", "0", "0", "0", "map", "world"],
-            ),
-            Node(
-                package="giskardpy_ros",
-                executable="tracy_standalone",
-                name="giskard",
-                parameters=[{"robot_description": robot_description}],
-                output="screen",
-            ),
-            Node(
-                package="giskardpy_ros",
-                executable="interactive_marker",
-                name="giskard_interactive_marker",
-                parameters=[
-                    {
-                        "root_links": ["map", "map"],
-                        "tip_links": ["l_gripper_tool_frame", "r_gripper_tool_frame"],
-                    }
-                ],
-                output="screen",
-            ),
-            # RViz node
-            Node(
-                package="rviz2",
-                executable="rviz2",
-                name="rviz2",
-                output="screen",
-            ),
-        ]
+    return giskard_launch_description(
+        executable="tracy_standalone",
+        xacro_package="iai_tracy_description",
+        xacro_file="urdf/tracy.urdf.xacro",
+        root_links=["map", "map"],
+        tip_links=["l_gripper_tool_frame", "r_gripper_tool_frame"],
+        rviz=True,
+        map_world_tf=True,
     )
